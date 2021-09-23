@@ -36,11 +36,12 @@ func TestRoundtrip(t *testing.T) {
 
 		originalPath: "testdata/Dockerfile.multistage",
 		expectedPath: "testdata/rendered/Dockerfile.multistage",
-	}, {
-		desc: "apache2",
+		//TODO: pick up https://github.com/moby/buildkit/pull/2375
+		// }, {
+		// 	desc: "apache2",
 
-		originalPath: "testdata/Dockerfile.withapache2",
-		expectedPath: "testdata/rendered/Dockerfile.withapache2",
+		// 	originalPath: "testdata/Dockerfile.withapache2",
+		// 	expectedPath: "testdata/rendered/Dockerfile.withapache2",
 	}}
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {

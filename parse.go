@@ -29,7 +29,6 @@ func Parse(dockerfile io.Reader) (*Parsed, error) {
 func renderNode(w io.Writer, node *parser.Node) error {
 	curr := node
 	for curr != nil {
-		//TODO: make sure to pick up https://github.com/moby/buildkit/pull/2375
 		for _, line := range curr.PrevComment {
 			if _, err := fmt.Fprintln(w, dockerfileCommentToken, line); err != nil {
 				return err
