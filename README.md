@@ -1,2 +1,2 @@
-# dockerfile
-Utilities for interacting with Dockerfiles
+# go-dockerfile
+Golang utilities for interacting with Dockerfiles

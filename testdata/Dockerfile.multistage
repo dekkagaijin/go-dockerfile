@@ -1,0 +1,7 @@
+# Comment1
+FROM build-image
+COPY . /app
+# Comment 2
+RUN make /app
+FROM runtime-image
+CMD /app/bin
