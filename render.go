@@ -31,7 +31,7 @@ func (p Renderer) Render(df *AST, out io.Writer) error {
 				fmt.Fprint(out, dockerfileCommentToken, line)
 			}
 		} else if inst, ok := stmt.(Instruction); ok {
-			if st == FromStatement && i > 0 && df.Statements[i-1].StatementType() == CommentStatement {
+			if st == FromStatement && i > 0 && df.Statements[i-1].StatementType() != CommentStatement {
 				// Add a blank line between FROM statement blocks
 				fmt.Fprintln(out)
 			}

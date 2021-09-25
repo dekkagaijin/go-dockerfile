@@ -27,12 +27,13 @@ func TestRoundtrip(t *testing.T) {
 
 		originalPath string
 		expectedPath string
-	}{{
-		desc: "basic",
+	}{
+		{
+			desc: "basic",
 
-		originalPath: "testdata/basic/Dockerfile",
-		expectedPath: "testdata/basic/Dockerfile.rendered",
-	},
+			originalPath: "testdata/basic/Dockerfile",
+			expectedPath: "testdata/basic/Dockerfile.rendered",
+		},
 		{
 			desc: "multistage",
 
@@ -44,7 +45,14 @@ func TestRoundtrip(t *testing.T) {
 
 			originalPath: "testdata/license-statement/Dockerfile",
 			expectedPath: "testdata/license-statement/Dockerfile.rendered",
-		}}
+		},
+		{
+			desc: "escaped",
+
+			originalPath: "testdata/escaped/Dockerfile",
+			expectedPath: "testdata/escaped/Dockerfile.rendered",
+		},
+	}
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			t.Parallel()
