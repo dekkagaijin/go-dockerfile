@@ -4,6 +4,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -29,20 +30,21 @@ func TestRoundtrip(t *testing.T) {
 	}{{
 		desc: "basic",
 
-		originalPath: "testdata/Dockerfile.basic",
-		expectedPath: "testdata/rendered/Dockerfile.basic",
-	}, {
-		desc: "multistage",
+		originalPath: "testdata/basic/Dockerfile",
+		expectedPath: "testdata/basic/Dockerfile.rendered",
+	},
+		{
+			desc: "multistage",
 
-		originalPath: "testdata/Dockerfile.multistage",
-		expectedPath: "testdata/rendered/Dockerfile.multistage",
-		//TODO: pick up https://github.com/moby/buildkit/pull/2375
-		// }, {
-		// 	desc: "apache2",
+			originalPath: "testdata/multistage/Dockerfile",
+			expectedPath: "testdata/multistage/Dockerfile.rendered",
+		},
+		{
+			desc: "apache2",
 
-		// 	originalPath: "testdata/Dockerfile.withapache2",
-		// 	expectedPath: "testdata/rendered/Dockerfile.withapache2",
-	}}
+			originalPath: "testdata/license-statement/Dockerfile",
+			expectedPath: "testdata/license-statement/Dockerfile.rendered",
+		}}
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			t.Parallel()
@@ -61,7 +63,11 @@ func TestRoundtrip(t *testing.T) {
 				t.Fatalf("Parse() error'd: %v", err)
 			}
 			expected := string(expectedBytes)
-			rendered := parsed.String()
+			sb := strings.Builder{}
+			if err := Render(parsed, &sb); err != nil {
+				t.Fatalf("Render() error'd: %v", err)
+			}
+			rendered := sb.String()
 			if diff := cmp.Diff(expected, rendered); diff != "" {
 				t.Error("mismatch (-want +got)\n", diff)
 			}
