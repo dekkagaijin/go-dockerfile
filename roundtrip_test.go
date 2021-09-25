@@ -69,7 +69,7 @@ func TestRoundtrip(t *testing.T) {
 			}
 			rendered := sb.String()
 			if diff := cmp.Diff(expected, rendered); diff != "" {
-				t.Error("mismatch (-want +got)\n", diff)
+				t.Error("mismatch (-want +got):\n", diff)
 			}
 		})
 	}
