@@ -1,0 +1,5 @@
+# not a directive
+# too=late
+FROM scratch
+COPY . /app
+CMD /app/bin

@@ -42,6 +42,7 @@ func (p Parser) Parse(file io.Reader) (*AST, error) {
 type sequentialParser struct {
 	escapeCharacter rune
 	ast             *AST
+	directives      map[string]string
 }
 
 func (p *sequentialParser) Parse(lines []string) (*AST, error) {
@@ -50,8 +51,12 @@ func (p *sequentialParser) Parse(lines []string) (*AST, error) {
 		return nil, errors.New("dockerfile was empty")
 	}
 	p.ast = &AST{}
+	p.directives = map[string]string{}
 
-	remainingLines := lines
+	remainingLines, err := p.parseParserDirectives(lines)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read parser directives: %w", err)
+	}
 
 	for len(remainingLines) > 0 {
 		if blankLineMatcher.MatchString(remainingLines[0]) {
@@ -63,19 +68,20 @@ func (p *sequentialParser) Parse(lines []string) (*AST, error) {
 		remainingLines, err = p.parseStatement(remainingLines)
 		if err != nil {
 			lineNum := totalLines - len(remainingLines) + 1
-			return nil, fmt.Errorf("error parsing statement on line %d: %w", lineNum, err)
+			return nil, fmt.Errorf("failed parsing statement on line %d: %w", lineNum, err)
 		}
 	}
 	return p.ast, nil
 }
 
 const (
-	reStartOfLine        = "^"
-	reDontCare           = ".*"
-	reOptionalWhitespace = "[[:space:]]*"
-	reWhitespace         = "[[:space:]]+"
-	reNonWhitespace      = "[[:^space:]]+"
-	reEndOfLine          = "$"
+	reStartOfLine           = "^"
+	reDontCare              = ".*"
+	reOptionalWhitespace    = "[[:space:]]*"
+	reWhitespace            = "[[:space:]]+"
+	reNotWhitespace         = "[[:^space:]]+"
+	reNotWhitespaceOrEquals = "[^=[:space:]]+"
+	reEndOfLine             = "$"
 )
 
 var (
@@ -83,9 +89,9 @@ var (
 	instructionLineMatcher = regexp.MustCompile(
 		reStartOfLine +
 			reOptionalWhitespace +
-			"(" + reNonWhitespace + ")" +
+			"(" + reNotWhitespace + ")" +
 			reWhitespace +
-			reNonWhitespace +
+			reNotWhitespace +
 			reDontCare +
 			reEndOfLine)
 	commentLineMatcher = regexp.MustCompile(
@@ -94,7 +100,42 @@ var (
 			dockerfileCommentToken +
 			"(" + reDontCare + ")" +
 			reEndOfLine)
+	parserDirectiveMatcher = regexp.MustCompile(
+		reStartOfLine +
+			reOptionalWhitespace +
+			dockerfileCommentToken +
+			reOptionalWhitespace +
+			"(" + reNotWhitespaceOrEquals + ")" + // key
+			reOptionalWhitespace +
+			"=" +
+			reOptionalWhitespace +
+			"(" + reNotWhitespaceOrEquals + ")" + // value
+			reOptionalWhitespace +
+			reEndOfLine)
 )
+
+// Dockerfile parser directives are a special type of comment of the format
+// `# key=value` which occur at the beginning of the file.
+// As soon as the parser encounters a blank line, an instruction,
+// or a comment that does not match this form, it will treat all remaining comments as ordinary.
+// See: https://docs.docker.com/engine/reference/builder/#parser-directives
+func (p *sequentialParser) parseParserDirectives(lines []string) (remainingLines []string, err error) {
+	remainingLines = lines
+	for len(remainingLines) > 0 {
+		matches := parserDirectiveMatcher.FindStringSubmatch(remainingLines[0])
+		if len(matches) != 3 {
+			break
+		}
+		k, v := strings.TrimSpace(matches[1]), strings.TrimSpace(matches[2])
+		k = strings.ToLower(k)
+		if _, alreadySet := p.directives[k]; alreadySet {
+			return remainingLines, fmt.Errorf("directive %q set multiple times", k)
+		}
+		p.directives[k] = v
+		remainingLines = remainingLines[1:]
+	}
+	return remainingLines, nil
+}
 
 func (p *sequentialParser) parseGenericInstruction(st StatementType, lines []string) (remainingLines []string, err error) {
 	inst := &TODOInstruction{Type: st}
