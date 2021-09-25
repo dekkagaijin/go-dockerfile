@@ -25,11 +25,20 @@
 
 # notadirective=true
 
-ArG FOO=foo-default
+    ArG FOO=foo-default
 
 fRoM build-image-1
-arg BAR
+      arg FOO
+Run cmd \
 
-from build-image-2:tag
+  arg1 \
+    # Interstital comment
+
+    arg2
+
+    
+
+from     build-image-2:tag
 
 FROM runtime-image@sha256:0bf474896363505e5ea5e5d6ace8ebfb13a760a409b1fb467d428fc716f9f284
+CMD  echo      -n "test test test"    |  wc    -
