@@ -1,0 +1,17 @@
+# This is probably a license statement.
+# Lawyers will either love or hate you if remove this from derivative work.
+
+# Comment about the build image.
+FROM image
+COPY /src /dst
+RUN make
+
+# This is my developer manifesto.
+# You shouldn't modify this file because it might cause work for me.
+# Please understand my pain.
+
+# This is context for the runtime image.
+FROM runtime-image
+
+# One more thought down here.
+ENTRYPOINT [ "/bin/app", "arg1", "arg, too" ]

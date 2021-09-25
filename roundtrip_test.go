@@ -41,7 +41,7 @@ func TestRoundtrip(t *testing.T) {
 			expectedPath: "testdata/multistage/Dockerfile.rendered",
 		},
 		{
-			desc: "apache2",
+			desc: "license statement",
 
 			originalPath: "testdata/license-statement/Dockerfile",
 			expectedPath: "testdata/license-statement/Dockerfile.rendered",
@@ -52,8 +52,15 @@ func TestRoundtrip(t *testing.T) {
 			originalPath: "testdata/escaped/Dockerfile",
 			expectedPath: "testdata/escaped/Dockerfile.rendered",
 		},
+		{
+			desc: "comments",
+
+			originalPath: "testdata/comments/Dockerfile",
+			expectedPath: "testdata/comments/Dockerfile.rendered",
+		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.desc, func(t *testing.T) {
 			t.Parallel()
 			originalFile := mustOpen(t, tc.originalPath)

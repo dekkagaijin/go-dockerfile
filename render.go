@@ -19,11 +19,15 @@ var defaultRenderer = Renderer{escapeCharacter: DefaultExcapeCharacter}
 func (p Renderer) Render(df *AST, out io.Writer) error {
 	for i, stmt := range df.Statements {
 		if i > 0 {
-			// Only add newlines between statements, not at the end of the file.
+			// Avoid adding a newline at the end of the file.
 			fmt.Fprintln(out)
 		}
 		st := stmt.StatementType()
 		if cmnt, ok := stmt.(*Comment); ok {
+			if i > 0 && df.Statements[i-1].StatementType() == CommentStatement {
+				// Add a blank line between distinct comment blocks
+				fmt.Fprintln(out)
+			}
 			for j, line := range cmnt.Lines {
 				if j > 0 {
 					fmt.Fprintln(out)
