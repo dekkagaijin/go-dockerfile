@@ -64,6 +64,12 @@ func TestRoundtrip(t *testing.T) {
 			originalPath: "testdata/parser-directives/Dockerfile",
 			expectedPath: "testdata/parser-directives/Dockerfile.rendered",
 		},
+		{
+			desc: "the gauntlet",
+
+			originalPath: "testdata/gauntlet/Dockerfile",
+			expectedPath: "testdata/gauntlet/Dockerfile.rendered",
+		},
 	}
 	for _, tc := range testCases {
 		tc := tc

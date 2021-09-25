@@ -16,29 +16,6 @@ const (
 	dockerfileCommentToken = "#"
 )
 
-type Parser struct {
-	escapeCharacter rune
-}
-
-var defaultParser = Parser{escapeCharacter: DefaultExcapeCharacter}
-
-func NewParser(escapeCharacter rune) (*Parser, error) {
-	if escapeCharacter != DefaultExcapeCharacter && escapeCharacter != WindowsEscapeCharacter {
-		return nil, fmt.Errorf("escapeCharacter must be one of [%q, %q]", DefaultExcapeCharacter, WindowsEscapeCharacter)
-	}
-	return &Parser{escapeCharacter: escapeCharacter}, nil
-}
-
-func (p Parser) Parse(file io.Reader) (*AST, error) {
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-	sp := sequentialParser{escapeCharacter: p.escapeCharacter}
-	return sp.Parse(lines)
-}
-
 type sequentialParser struct {
 	escapeCharacter rune
 	ast             *AST
@@ -205,5 +182,11 @@ func (p *sequentialParser) parseComment(lines []string) (remainingLines []string
 
 // Parse parses the given Dockerfile into an AST.
 func Parse(file io.Reader) (*AST, error) {
-	return defaultParser.Parse(file)
+	var lines []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	sp := sequentialParser{escapeCharacter: DefaultExcapeCharacter}
+	return sp.Parse(lines)
 }

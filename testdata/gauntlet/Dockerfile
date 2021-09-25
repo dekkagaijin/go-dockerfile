@@ -1,3 +1,6 @@
+#syntax=docker/dockerfile:1.0
+#     escape     =      \
+
 # MIT License
 #
 # Copyright (c) 2021 Jake Sanders
@@ -19,9 +22,14 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-ARG RUNTIME_IMAGE=gcr.io/distroless/base
 
-FROM $RUNTIME_IMAGE
-COPY app /bin/app
-USER nobody
-ENTRYPOINT [ "/bin/app" ]
+# notadirective=true
+
+ArG FOO=foo-default
+
+fRoM build-image-1
+arg BAR
+
+from build-image-2:tag
+
+FROM runtime-image@sha256:0bf474896363505e5ea5e5d6ace8ebfb13a760a409b1fb467d428fc716f9f284

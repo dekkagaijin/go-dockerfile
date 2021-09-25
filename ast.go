@@ -85,7 +85,8 @@ type Instruction interface {
 }
 
 type AST struct {
-	Statements []Statement
+	Statements      []Statement
+	EscapeCharacter rune
 }
 
 type TODOInstruction struct {
