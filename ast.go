@@ -28,26 +28,26 @@ const (
 	WorkdirStatement     StatementType = "WORKDIR"
 )
 
-var KnownStatementTypes = map[StatementType]interface{}{
-	AddStatement:         nil,
-	ArgStatement:         nil,
-	CmdStatement:         nil,
-	CommentStatement:     nil,
-	CopyStatement:        nil,
-	EntrypointStatement:  nil,
-	EnvStatement:         nil,
-	ExposeStatement:      nil,
-	FromStatement:        nil,
-	HealthcheckStatement: nil,
-	LabelStatement:       nil,
-	MaintainerStatement:  nil,
-	OnbuildStatement:     nil,
-	RunStatement:         nil,
-	ShellStatement:       nil,
-	StopSignalStatement:  nil,
-	UserStatement:        nil,
-	VolumeStatement:      nil,
-	WorkdirStatement:     nil,
+var KnownStatementTypes = map[StatementType]bool{
+	AddStatement:         true,
+	ArgStatement:         true,
+	CmdStatement:         true,
+	CommentStatement:     true,
+	CopyStatement:        true,
+	EntrypointStatement:  true,
+	EnvStatement:         true,
+	ExposeStatement:      true,
+	FromStatement:        true,
+	HealthcheckStatement: true,
+	LabelStatement:       true,
+	MaintainerStatement:  true,
+	OnbuildStatement:     true,
+	RunStatement:         true,
+	ShellStatement:       true,
+	StopSignalStatement:  true,
+	UserStatement:        true,
+	VolumeStatement:      true,
+	WorkdirStatement:     true,
 }
 
 // StatementMatchers is a mapping of statement types to matching regular expressions.

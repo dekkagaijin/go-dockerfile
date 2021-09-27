@@ -16,6 +16,27 @@ const (
 	dockerfileCommentToken = "#"
 )
 
+var canHaveContinuation = map[StatementType]bool{
+	AddStatement:         true,
+	ArgStatement:         true,
+	CmdStatement:         true,
+	CopyStatement:        true,
+	EntrypointStatement:  true,
+	EnvStatement:         true,
+	ExposeStatement:      true,
+	FromStatement:        true,
+	HealthcheckStatement: true,
+	LabelStatement:       true,
+	MaintainerStatement:  true,
+	OnbuildStatement:     true,
+	RunStatement:         true,
+	ShellStatement:       true,
+	StopSignalStatement:  true,
+	UserStatement:        true,
+	VolumeStatement:      true,
+	WorkdirStatement:     true,
+}
+
 type sequentialParser struct {
 	escapeCharacter rune
 	ast             *AST
@@ -158,7 +179,7 @@ func (p *sequentialParser) parseInstruction(lines []string) (remainingLines []st
 		return lines, fmt.Errorf("syntax error: %q", currentLine)
 	}
 	instruction := StatementType(strings.ToUpper(reMatches[1]))
-	if _, known := KnownStatementTypes[instruction]; !known {
+	if !KnownStatementTypes[instruction] {
 		return lines, fmt.Errorf("unknown instruction: %q", instruction)
 	}
 	switch instruction {
