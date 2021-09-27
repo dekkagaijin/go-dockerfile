@@ -138,7 +138,6 @@ func (p *sequentialParser) parseGenericInstruction(st StatementType, lines []str
 			// Remove the command from the first line of args
 			currentLine = currentLine[len(string(st)):]
 		}
-		//TODO: it's not safe in general to get rid of whitespace between args
 		inst.Args = append(inst.Args, strings.Fields(currentLine)...)
 	}
 	p.ast.Statements = append(p.ast.Statements, inst)
