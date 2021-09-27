@@ -2,6 +2,7 @@ package dockerfile
 
 import (
 	"io"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -28,27 +29,16 @@ func TestRenderE2E(t *testing.T) {
 		expectedPath string
 	}{}
 
-	testDirs := []string{"testdata/render"}
-	for len(testDirs) > 0 {
-		var testDir string
-		testDir, testDirs = testDirs[0], testDirs[1:]
-		files, err := ioutil.ReadDir(testDir)
-		if err != nil {
-			t.Fatalf("failed to read testdir %q: %v", testDir, err)
+	if err := filepath.WalkDir("testdata/render", func(path string, d fs.DirEntry, err error) error {
+		if !(d.IsDir() || strings.HasSuffix(path, ".rendered")) {
+			tc := testCases[path]
+			tc.originalPath = path
+			tc.expectedPath = path + ".rendered"
+			testCases[path] = tc
 		}
-		for _, file := range files {
-			filePath := filepath.Join(testDir, file.Name())
-			if file.IsDir() {
-				testDirs = append(testDirs, filePath)
-				continue
-			}
-			if !strings.HasSuffix(file.Name(), ".rendered") {
-				tc := testCases[filePath]
-				tc.originalPath = filePath
-				tc.expectedPath = filePath + ".rendered"
-				testCases[filePath] = tc
-			}
-		}
+		return nil
+	}); err != nil {
+		t.Fatalf("failed to load testdata: %v", err)
 	}
 
 	if len(testCases) == 0 {
