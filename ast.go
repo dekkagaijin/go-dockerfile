@@ -94,9 +94,9 @@ type TODOInstruction struct {
 
 	Args []string
 
-	// Raw is all of the raw input lines of the statement, minus newline escape characters.
+	// Lines is all of the input lines of the statement, minus newline escape characters and leading/trailing whitespace.
 	// This includes the instruction name in the first line, as well as any comment lines.
-	Raw []string
+	Lines []string
 }
 
 func (i *TODOInstruction) StatementType() StatementType {

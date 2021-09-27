@@ -135,6 +135,12 @@ func (p *sequentialParser) parseParserDirectives(lines []string) (remainingLines
 	return remainingLines, nil
 }
 
+func hasContinuation(line string, escapeCharacter rune) bool {
+	// TODO: support long stretches of terminal escapes? This is consistent with buildkit's impl
+	// https://github.com/moby/buildkit/blob/1031116f12ec6f80c11782c93a48891f848168b9/frontend/dockerfile/parser/parser.go#L164
+	return strings.HasSuffix(line, string(escapeCharacter)) && !strings.HasSuffix(line, string(escapeCharacter)+string(escapeCharacter))
+}
+
 func (p *sequentialParser) parseGenericInstruction(st StatementType, lines []string) (remainingLines []string, err error) {
 	inst := &TODOInstruction{Type: st}
 	remainingLines = lines
@@ -146,16 +152,18 @@ func (p *sequentialParser) parseGenericInstruction(st StatementType, lines []str
 			continue
 		}
 		if commentLineMatcher.MatchString(currentLine) {
-			inst.Raw = append(inst.Raw, currentLine)
+			inst.Lines = append(inst.Lines, currentLine)
 			continue
 		}
 		terminated = true
-		if strings.HasSuffix(currentLine, string(p.escapeCharacter)) {
+
+		if canHaveContinuation[st] && hasContinuation(currentLine, p.escapeCharacter) {
 			terminated = false
 			currentLine = strings.TrimSuffix(currentLine, string(p.escapeCharacter))
+			currentLine = strings.TrimSpace(currentLine)
 		}
-		inst.Raw = append(inst.Raw, currentLine)
-		if len(inst.Raw) == 1 {
+		inst.Lines = append(inst.Lines, currentLine)
+		if len(inst.Lines) == 1 {
 			// Remove the command from the first line of args
 			currentLine = currentLine[len(string(st)):]
 		}
