@@ -12,6 +12,8 @@ import (
 const (
 	DefaultExcapeCharacter = '\\'
 	WindowsEscapeCharacter = '`'
+
+	EscapeParserDirectiveKey = "escape"
 )
 
 var canHaveContinuation = map[statements.Type]bool{
@@ -132,6 +134,13 @@ func (p *Sequential) parseParserDirectives(lines []string) (remainingLines []str
 		k = strings.ToLower(k)
 		if _, alreadySet := p.directives[k]; alreadySet {
 			return remainingLines, fmt.Errorf("directive %q set multiple times", k)
+		}
+		if k == "escape" {
+			vRunes := []rune(v)
+			if len(vRunes) > 1 || !(vRunes[0] == DefaultExcapeCharacter || vRunes[0] == WindowsEscapeCharacter) {
+				return remainingLines, fmt.Errorf("escape token must be one of [%q, %q], got %q", DefaultExcapeCharacter, WindowsEscapeCharacter, v)
+			}
+			p.escapeCharacter = vRunes[0]
 		}
 		p.directives[k] = v
 		remainingLines = remainingLines[1:]

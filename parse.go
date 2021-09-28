@@ -11,6 +11,7 @@ import (
 const (
 	DefaultExcapeCharacter = parser.DefaultExcapeCharacter
 	WindowsEscapeCharacter = parser.WindowsEscapeCharacter
+	CommentToken = parser.CommentToken
 )
 
 type Parsed struct {

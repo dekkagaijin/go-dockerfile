@@ -20,6 +20,10 @@ var defaultRenderer = Renderer{escapeCharacter: DefaultExcapeCharacter}
 // }
 
 func (p Renderer) Render(df *Parsed, out io.Writer) error {
+	if df.EscapeCharacter != DefaultExcapeCharacter {
+		fmt.Fprintln(out, CommentToken, parser.EscapeParserDirectiveKey+"="+string(df.EscapeCharacter))
+		fmt.Fprintln(out)
+	}
 	for i, stmt := range df.Statements {
 		if i > 0 {
 			// Avoid adding a newline at the end of the file.
