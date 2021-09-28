@@ -3,6 +3,9 @@ package dockerfile
 import (
 	"fmt"
 	"io"
+
+	"github.com/dekkagaijin/go-dockerfile/internal/parser"
+	"github.com/dekkagaijin/go-dockerfile/statements"
 )
 
 type Renderer struct {
@@ -16,15 +19,15 @@ var defaultRenderer = Renderer{escapeCharacter: DefaultExcapeCharacter}
 // 	return &Renderer{escapeCharacter: escapeCharacter, skipComments: skipComments}
 // }
 
-func (p Renderer) Render(df *AST, out io.Writer) error {
+func (p Renderer) Render(df *Parsed, out io.Writer) error {
 	for i, stmt := range df.Statements {
 		if i > 0 {
 			// Avoid adding a newline at the end of the file.
 			fmt.Fprintln(out)
 		}
-		st := stmt.StatementType()
-		if cmnt, ok := stmt.(*Comment); ok {
-			if i > 0 && df.Statements[i-1].StatementType() == CommentStatement {
+		st := stmt.Type()
+		if cmnt, ok := stmt.(*statements.Comment); ok {
+			if i > 0 && df.Statements[i-1].Type() == statements.CommentType {
 				// Add a blank line between distinct comment blocks
 				fmt.Fprintln(out)
 			}
@@ -32,14 +35,14 @@ func (p Renderer) Render(df *AST, out io.Writer) error {
 				if j > 0 {
 					fmt.Fprintln(out)
 				}
-				fmt.Fprint(out, dockerfileCommentToken, line)
+				fmt.Fprint(out, parser.CommentToken, line)
 			}
-		} else if inst, ok := stmt.(Instruction); ok {
-			if st == FromStatement && i > 0 && df.Statements[i-1].StatementType() != CommentStatement {
+		} else if inst, ok := stmt.(statements.Instruction); ok {
+			if st == statements.FromType && i > 0 && df.Statements[i-1].Type() != statements.CommentType {
 				// Add a blank line between FROM statement blocks
 				fmt.Fprintln(out)
 			}
-			fmt.Fprint(out, string(inst.StatementType()))
+			fmt.Fprint(out, string(inst.Type()))
 			for k, v := range inst.Flags() {
 				fmt.Fprint(out, " --", k, "=", v)
 			}
@@ -47,13 +50,13 @@ func (p Renderer) Render(df *AST, out io.Writer) error {
 				fmt.Fprint(out, " ", arg)
 			}
 		} else {
-			return fmt.Errorf("unknown statement type: %s", stmt.StatementType())
+			return fmt.Errorf("unknown statement type: %s", stmt.Type())
 		}
 	}
 	return nil
 }
 
 // Render parses the
-func Render(df *AST, out io.Writer) error {
+func Render(df *Parsed, out io.Writer) error {
 	return defaultRenderer.Render(df, out)
 }
