@@ -74,7 +74,7 @@ type Statement interface {
 }
 
 type Arguments struct {
-	// List of individual arguments, if Execable, otherwise lines of arguments.
+	// List of individual arguments, if `exec`able, otherwise lines of arguments.
 	List []string
 	// Whether the args can be passed individually to `exec` or need to be interpreted as a whole by the shell.
 	Execable bool
@@ -88,14 +88,12 @@ type Instruction interface {
 }
 
 type TODO GenericInstruction
-type AddInstruction GenericInstruction
 type ArgInstruction TODO
 type CmdInstruction GenericInstruction
 type CopyInstruction GenericInstruction
 type EntrypointInstruction GenericInstruction
 type EnvInstruction TODO
 type ExposeInstruction TODO
-type FromInstruction TODO
 type HealthcheckInstruction TODO
 type LabelInstruction TODO
 type MaintainerInstruction TODO

@@ -1,8 +1,6 @@
 package statement
 
-type Add struct {
-	InstructionType Type
-
+type AddInstruction struct {
 	Args Arguments
 
 	// Lines are all of the input lines of the statement, minus newline escape characters and leading/trailing whitespace.
@@ -10,14 +8,14 @@ type Add struct {
 	Lines []string
 }
 
-func (i *Add) Type() Type {
-	return i.InstructionType
+func (i *AddInstruction) Type() Type {
+	return ADD
 }
 
-func (*Add) Flags() map[string]string {
+func (*AddInstruction) Flags() map[string]string {
 	return nil
 }
 
-func (i *Add) Arguments() Arguments {
+func (i *AddInstruction) Arguments() Arguments {
 	return i.Args
 }
