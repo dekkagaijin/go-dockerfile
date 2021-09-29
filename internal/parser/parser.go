@@ -267,8 +267,5 @@ func scanInstructionLines(lines []string, escapeCharacter rune) (st statement.Ty
 		rawArgs += currentLine
 		statementLines = append(statementLines, currentLine)
 	}
-	if !terminated {
-		return statement.Type(""), "", nil, lines, errors.New("multi-line statement does not terminate")
-	}
 	return st, rawArgs, statementLines, remainingLines, nil
 }
