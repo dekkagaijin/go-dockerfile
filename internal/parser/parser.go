@@ -16,7 +16,7 @@ const (
 	EscapeParserDirectiveKey = "escape"
 )
 
-type sequentialstatementScannerFor func(lines []string, escapeCharacter rune) (stmt statements.Statement, remainingLines []string, err error)
+type statementScanFn func(lines []string, escapeCharacter rune) (stmt statements.Statement, remainingLines []string, err error)
 
 // var canHaveContinuation = map[statements.Type]bool{
 // 	statements.AddType:         true,
@@ -40,26 +40,29 @@ type sequentialstatementScannerFor func(lines []string, escapeCharacter rune) (s
 // 	statements.WorkdirType:     true,
 // }
 
-var statementScannerFor = map[statements.Type]sequentialstatementScannerFor{
-	statements.AddType: scanGenericInstruction,
-	statements.ArgType: scanGenericInstruction,
-	statements.CmdType: scanGenericInstruction,
-	//statements.CommentType:     nil,
-	statements.CopyType:        scanGenericInstruction,
-	statements.EntrypointType:  scanGenericInstruction,
-	statements.EnvType:         scanGenericInstruction,
-	statements.ExposeType:      scanGenericInstruction,
-	statements.FromType:        scanGenericInstruction,
-	statements.HealthcheckType: scanGenericInstruction,
-	statements.LabelType:       scanGenericInstruction,
-	statements.MaintainerType:  scanGenericInstruction,
-	statements.OnbuildType:     scanGenericInstruction,
-	statements.RunType:         scanGenericInstruction,
-	statements.ShellType:       scanGenericInstruction,
-	statements.StopSignalType:  scanGenericInstruction,
-	statements.UserType:        scanGenericInstruction,
-	statements.VolumeType:      scanGenericInstruction,
-	statements.WorkdirType:     scanGenericInstruction,
+var statementScannerFor = map[statements.Type]statementScanFn{
+	statements.CommentType: func(lines []string, _ rune) (stmt statements.Statement, remainingLines []string, err error) {
+		// comments do not escape characters
+		return scanComment(lines)
+	},
+	statements.AddType:         scanADD,
+	statements.ArgType:         scanARG,
+	statements.CmdType:         scanCMD,
+	statements.CopyType:        scanCOPY,
+	statements.EntrypointType:  scanENTRYPOINT,
+	statements.EnvType:         scanENV,
+	statements.ExposeType:      scanEXPOSE,
+	statements.FromType:        scanFROM,
+	statements.HealthcheckType: scanHEALTHCHECK,
+	statements.LabelType:       scanLABEL,
+	statements.MaintainerType:  scanMAINTAINER,
+	statements.OnbuildType:     scanONBUILD,
+	statements.RunType:         scanRUN,
+	statements.ShellType:       scanSHELL,
+	statements.StopSignalType:  scanSTOPSIGNAL,
+	statements.UserType:        scanUSER,
+	statements.VolumeType:      scanVOLUME,
+	statements.WorkdirType:     scanWORKDIR,
 }
 
 type Sequential struct {
@@ -181,23 +184,10 @@ func hasContinuation(line string, escapeCharacter rune) bool {
 }
 
 func scanStatement(lines []string, escapeCharacter rune) (stmt statements.Statement, remainingLines []string, err error) {
-
 	if commentLineMatcher.MatchString(lines[0]) {
 		return scanComment(lines)
 	}
 	return scanInstruction(lines, escapeCharacter)
-}
-
-func scanComment(lines []string) (stmt statements.Statement, remainingLines []string, err error) {
-	remainingLines = lines
-	cmnt := &statements.Comment{}
-	for len(remainingLines) > 0 && commentLineMatcher.MatchString(remainingLines[0]) {
-		curr := strings.TrimSpace(remainingLines[0])
-		curr = strings.TrimPrefix(curr, CommentToken) // remove leading "#"
-		cmnt.Lines = append(cmnt.Lines, curr)
-		remainingLines = remainingLines[1:]
-	}
-	return cmnt, remainingLines, nil
 }
 
 func scanInstruction(lines []string, escapeCharacter rune) (stmt statements.Statement, remainingLines []string, err error) {
