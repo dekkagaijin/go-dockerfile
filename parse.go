@@ -11,7 +11,7 @@ import (
 const (
 	DefaultExcapeCharacter = parser.DefaultExcapeCharacter
 	WindowsEscapeCharacter = parser.WindowsEscapeCharacter
-	CommentToken = parser.CommentToken
+	CommentToken           = parser.CommentToken
 )
 
 type Parsed struct {
@@ -26,7 +26,7 @@ func Parse(file io.Reader) (*Parsed, error) {
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
-	sp := parser.NewSequentialParser()
+	sp := parser.Sequential{}
 	statements, escapeChar, err := sp.Parse(lines)
 	if err != nil {
 		return nil, err
