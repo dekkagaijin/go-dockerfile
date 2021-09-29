@@ -166,7 +166,7 @@ func scanParserDirectives(lines []string) (directives map[string]string, remaini
 		k, v := strings.TrimSpace(matches[1]), strings.TrimSpace(matches[2])
 		k = strings.ToLower(k)
 		if _, alreadySet := directives[k]; alreadySet {
-			return nil, remainingLines, fmt.Errorf("directive %q set multiple times", k)
+			return nil, lines, fmt.Errorf("directive %q set multiple times", k)
 		}
 		directives[k] = v
 		remainingLines = remainingLines[1:]
@@ -188,6 +188,18 @@ func scanStatement(lines []string, escapeCharacter rune) (stmt statements.Statem
 	return scanInstruction(lines, escapeCharacter)
 }
 
+func scanComment(lines []string) (stmt statements.Statement, remainingLines []string, err error) {
+	remainingLines = lines
+	cmnt := &statements.Comment{}
+	for len(remainingLines) > 0 && commentLineMatcher.MatchString(remainingLines[0]) {
+		curr := strings.TrimSpace(remainingLines[0])
+		curr = strings.TrimPrefix(curr, CommentToken) // remove leading "#"
+		cmnt.Lines = append(cmnt.Lines, curr)
+		remainingLines = remainingLines[1:]
+	}
+	return cmnt, remainingLines, nil
+}
+
 func scanInstruction(lines []string, escapeCharacter rune) (stmt statements.Statement, remainingLines []string, err error) {
 	currentLine := strings.TrimSpace(lines[0])
 	reMatches := instructionLineMatcher.FindStringSubmatch(currentLine)
@@ -203,18 +215,6 @@ func scanInstruction(lines []string, escapeCharacter rune) (stmt statements.Stat
 		return scanInstruction(lines, escapeCharacter)
 	}
 	return scanGenericInstruction(lines, escapeCharacter)
-}
-
-func scanComment(lines []string) (stmt statements.Statement, remainingLines []string, err error) {
-	remainingLines = lines
-	cmnt := &statements.Comment{}
-	for len(remainingLines) > 0 && commentLineMatcher.MatchString(remainingLines[0]) {
-		curr := strings.TrimSpace(remainingLines[0])
-		curr = strings.TrimPrefix(curr, CommentToken) // remove leading "#"
-		cmnt.Lines = append(cmnt.Lines, curr)
-		remainingLines = remainingLines[1:]
-	}
-	return cmnt, remainingLines, nil
 }
 
 func trimContinuation(line string, escapeCharacter rune) string {
@@ -258,6 +258,9 @@ func scanGenericInstruction(lines []string, escapeCharacter rune) (stmt statemen
 
 		inst.Lines = append(inst.Lines, currentLine)
 		inst.Args = append(inst.Args, strings.Fields(currentLine)...)
+	}
+	if !terminated {
+		return nil, lines, errors.New("multi-line statement is not terminated")
 	}
 	return inst, remainingLines, nil
 }
