@@ -207,27 +207,39 @@ func scanInstruction(lines []string, escapeCharacter rune) (stmt statement.State
 	return scanGenericInstruction(lines, escapeCharacter)
 }
 
-func trimContinuation(line string, escapeCharacter rune) string {
-	line = strings.TrimSuffix(line, string(escapeCharacter))
-	return strings.TrimSpace(line)
-}
-
 func scanGenericInstruction(lines []string, escapeCharacter rune) (stmt statement.Statement, remainingLines []string, err error) {
 	inst := &statement.GenericInstruction{}
+	st, rawArgs, statementLines, remainingLines, err := scanInstructionLines(lines, escapeCharacter)
+	if err != nil {
+		return nil, lines, err
+	}
+	inst.InstructionType = st
+	inst.Lines = statementLines
+	inst.Args = strings.Fields(rawArgs) // TODO accept JSON list?
+	return inst, remainingLines, nil
+}
 
+func scanInstructionLines(lines []string, escapeCharacter rune) (st statement.Type, rawArgs string, statementLines, remainingLines []string, err error) {
 	currentLine := strings.TrimSpace(lines[0])
 	remainingLines = lines[1:]
+
+	reMatches := instructionLineMatcher.FindStringSubmatch(currentLine)
+	if len(reMatches) != 2 {
+		return statement.Type(""), "", nil, lines, fmt.Errorf("syntax error: %q", currentLine)
+	}
+
+	st = statement.Type(strings.ToUpper(reMatches[1]))
+	statementLines = append(statementLines, currentLine)
+
+	currentLine = strings.TrimSpace(currentLine[len(string(st)):]) // trim command from first line
 
 	terminated := true
 	if hasContinuation(currentLine, escapeCharacter) {
 		terminated = false
-		currentLine = trimContinuation(currentLine, escapeCharacter)
+		currentLine = strings.TrimSuffix(currentLine, string(escapeCharacter))
 	}
 
-	args := strings.Fields(currentLine)
-	inst.InstructionType = statement.Type(strings.ToUpper(args[0]))
-	inst.Lines = append(inst.Lines, currentLine)
-	inst.Args = append(inst.Args, args[1:]...)
+	rawArgs = currentLine
 
 	for !terminated && len(remainingLines) > 0 {
 		currentLine = strings.TrimSpace(remainingLines[0])
@@ -238,21 +250,21 @@ func scanGenericInstruction(lines []string, escapeCharacter rune) (stmt statemen
 		}
 		if commentLineMatcher.MatchString(currentLine) {
 			// Interstitial comment lines are allowed in multi-line comments.
-			inst.Lines = append(inst.Lines, currentLine)
+			statementLines = append(statementLines, currentLine)
 			continue
 		}
 
 		if hasContinuation(currentLine, escapeCharacter) {
-			currentLine = trimContinuation(currentLine, escapeCharacter)
+			currentLine = strings.TrimSuffix(currentLine, string(escapeCharacter))
 		} else {
 			terminated = true
 		}
 
-		inst.Lines = append(inst.Lines, currentLine)
-		inst.Args = append(inst.Args, strings.Fields(currentLine)...)
+		rawArgs += currentLine
+		statementLines = append(statementLines, currentLine)
 	}
 	if !terminated {
-		return nil, lines, errors.New("multi-line statement is not terminated")
+		return statement.Type(""), "", nil, lines, errors.New("multi-line statement does not terminate")
 	}
-	return inst, remainingLines, nil
+	return st, rawArgs, statementLines, remainingLines, nil
 }
