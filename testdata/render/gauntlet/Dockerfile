@@ -29,6 +29,17 @@
 
 fRoM build-image-1
       arg FOO
+
+
+   ENv bar ${FOO}
+  ENv baz=${bar} \
+
+      dq="double-quoted \
+    value" \
+
+    
+  sq='single-quoted value'
+
 Run cmd \
 
   arg1 \
@@ -41,4 +52,8 @@ Run cmd \
 from     build-image-2:tag
 
 FROM runtime-image@sha256:0bf474896363505e5ea5e5d6ace8ebfb13a760a409b1fb467d428fc716f9f284
+
+
+ENV ONE TWO= THREE=world
+
 CMD  echo      -n "test test test"    |  wc    -

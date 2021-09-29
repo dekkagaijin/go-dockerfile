@@ -8,7 +8,7 @@ type AddInstruction struct {
 	Lines []string
 }
 
-func (i *AddInstruction) Type() Type {
+func (*AddInstruction) Type() Type {
 	return ADD
 }
 

@@ -82,17 +82,16 @@ type Arguments struct {
 
 type Instruction interface {
 	Statement
-	// Flags are the flags passed to
+	// Flags are the flags passed to the instruction.
 	Flags() map[string]string
+	// Arguments are the arguments passed to the command.
 	Arguments() Arguments
 }
 
 type TODO GenericInstruction
-type ArgInstruction TODO
 type CmdInstruction GenericInstruction
 type CopyInstruction GenericInstruction
 type EntrypointInstruction GenericInstruction
-type EnvInstruction TODO
 type ExposeInstruction TODO
 type HealthcheckInstruction TODO
 type LabelInstruction TODO
@@ -104,6 +103,3 @@ type StopSignalInstruction TODO
 type UserInstruction TODO
 type VolumeInstruction TODO
 type WorkdirInstruction TODO
-
-type ArgLine string
-type CommentLine string
