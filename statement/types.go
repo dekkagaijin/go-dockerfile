@@ -73,18 +73,26 @@ type Statement interface {
 	Type() Type
 }
 
+type Arguments struct {
+	// List of individual arguments, if Execable, otherwise lines of arguments.
+	List []string
+	// Whether the args can be passed individually to `exec` or need to be interpreted as a whole by the shell.
+	Execable bool
+}
+
 type Instruction interface {
 	Statement
 	// Flags are the flags passed to
 	Flags() map[string]string
-	Arguments() []string
+	Arguments() Arguments
 }
 
-type AddInstruction TODO
+type TODO GenericInstruction
+type AddInstruction GenericInstruction
 type ArgInstruction TODO
-type CmdInstruction TODO
-type CopyInstruction TODO
-type EntrypointInstruction TODO
+type CmdInstruction GenericInstruction
+type CopyInstruction GenericInstruction
+type EntrypointInstruction GenericInstruction
 type EnvInstruction TODO
 type ExposeInstruction TODO
 type FromInstruction TODO
@@ -98,3 +106,6 @@ type StopSignalInstruction TODO
 type UserInstruction TODO
 type VolumeInstruction TODO
 type WorkdirInstruction TODO
+
+type ArgLine string
+type CommentLine string

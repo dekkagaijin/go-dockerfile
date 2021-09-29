@@ -1,6 +1,6 @@
 package statement
 
-type GenericInstruction struct {
+type Add struct {
 	InstructionType Type
 
 	Args Arguments
@@ -10,14 +10,14 @@ type GenericInstruction struct {
 	Lines []string
 }
 
-func (i *GenericInstruction) Type() Type {
+func (i *Add) Type() Type {
 	return i.InstructionType
 }
 
-func (*GenericInstruction) Flags() map[string]string {
+func (*Add) Flags() map[string]string {
 	return nil
 }
 
-func (i *GenericInstruction) Arguments() Arguments {
+func (i *Add) Arguments() Arguments {
 	return i.Args
 }

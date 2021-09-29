@@ -3,6 +3,7 @@ package dockerfile
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/dekkagaijin/go-dockerfile/internal/parser"
 	"github.com/dekkagaijin/go-dockerfile/statement"
@@ -50,9 +51,15 @@ func (p Renderer) Render(df *Parsed, out io.Writer) error {
 			for k, v := range inst.Flags() {
 				fmt.Fprint(out, " --", k, "=", v)
 			}
-			for _, arg := range inst.Arguments() {
-				fmt.Fprint(out, " ", arg)
+			arguments := inst.Arguments()
+			if arguments.Execable {
+				fmt.Fprint(out, ` [ "`, strings.Join(arguments.List, `", "`), `" ]`)
+			} else {
+				for _, arg := range arguments.List {
+					fmt.Fprint(out, " ", arg)
+				}
 			}
+
 		} else {
 			return fmt.Errorf("unknown statement type: %s", stmt.Type())
 		}

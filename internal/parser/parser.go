@@ -204,18 +204,22 @@ func scanInstruction(lines []string, escapeCharacter rune) (stmt statement.State
 	if scanInstruction, exists := statementScannerFor[instruction]; exists {
 		return scanInstruction(lines, escapeCharacter)
 	}
-	return scanTODO(lines, escapeCharacter)
+	return scanGenericInstruction(lines, escapeCharacter)
 }
 
-func scanTODO(lines []string, escapeCharacter rune) (stmt statement.Statement, remainingLines []string, err error) {
-	inst := &statement.TODO{}
+func scanGenericInstruction(lines []string, escapeCharacter rune) (stmt statement.Statement, remainingLines []string, err error) {
+	inst := &statement.GenericInstruction{}
 	st, rawArgs, statementLines, remainingLines, err := scanInstructionLines(lines, escapeCharacter)
 	if err != nil {
 		return nil, lines, err
 	}
 	inst.InstructionType = st
 	inst.Lines = statementLines
-	inst.Args = strings.Fields(rawArgs) // TODO accept JSON list?
+	inst.Args = statement.Arguments{
+		List:     strings.Fields(rawArgs),
+		Execable: false,
+	}
+
 	return inst, remainingLines, nil
 }
 
