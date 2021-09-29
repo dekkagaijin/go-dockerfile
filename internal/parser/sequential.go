@@ -243,9 +243,11 @@ func scanGenericInstruction(lines []string, escapeCharacter rune) (stmt statemen
 		currentLine = strings.TrimSpace(remainingLines[0])
 		remainingLines = remainingLines[1:]
 		if currentLine == "" {
+			// Ignore blank lines in multi-line statements.
 			continue
 		}
 		if commentLineMatcher.MatchString(currentLine) {
+			// Interstitial comment lines are allowed in multi-line comments.
 			inst.Lines = append(inst.Lines, currentLine)
 			continue
 		}

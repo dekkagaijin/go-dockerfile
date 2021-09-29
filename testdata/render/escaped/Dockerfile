@@ -2,7 +2,7 @@
 FROM image
 RUN cmd \
   arg1 \
-  # Interstital comment
+  # Interstitial comment
   arg2
 FROM runtime-image
 CMD /app
