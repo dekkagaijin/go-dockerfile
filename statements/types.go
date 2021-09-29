@@ -24,7 +24,7 @@ const (
 	WorkdirType     Type = "WORKDIR"
 )
 
-var KnownTypes = map[Type]bool{
+var Known = map[Type]bool{
 	AddType:         true,
 	ArgType:         true,
 	CmdType:         true,

@@ -197,7 +197,7 @@ func scanInstruction(lines []string, escapeCharacter rune) (stmt statements.Stat
 		return nil, lines, fmt.Errorf("syntax error: %q", currentLine)
 	}
 	instruction := statements.Type(strings.ToUpper(reMatches[1]))
-	if !statements.KnownTypes[instruction] {
+	if !statements.Known[instruction] {
 		return nil, lines, fmt.Errorf("unknown instruction: %q", instruction)
 	}
 
