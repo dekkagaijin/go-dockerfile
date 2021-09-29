@@ -42,7 +42,7 @@ func (p Renderer) Render(df *Parsed, out io.Writer) error {
 				fmt.Fprint(out, parser.CommentToken, line)
 			}
 		} else if inst, ok := stmt.(statement.Instruction); ok {
-			if st == statement.FROMType && i > 0 && df.Statements[i-1].Type() != statement.CommentType {
+			if st == statement.FROM && i > 0 && df.Statements[i-1].Type() != statement.CommentType {
 				// Add a blank line between FROM statement blocks
 				fmt.Fprintln(out)
 			}

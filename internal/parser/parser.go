@@ -19,25 +19,25 @@ const (
 type statementScanFn func(lines []string, escapeCharacter rune) (stmt statement.Statement, remainingLines []string, err error)
 
 // var canHaveContinuation = map[statement.Type]bool{
-// 	statement.ADDType:         true,
-// 	statement.ARGType:         true,
-// 	statement.CMDType:         true,
+// 	statement.ADD:         true,
+// 	statement.ARG:         true,
+// 	statement.CMD:         true,
 // 	statement.CommentType:     false,
-// 	statement.COPYType:        true,
-// 	statement.ENTRYPOINTType:  true,
-// 	statement.ENVType:         true,
-// 	statement.EXPOSEType:      true,
-// 	statement.FROMType:        true,
-// 	statement.HEALTHCHECKType: true,
-// 	statement.LABELType:       true,
-// 	statement.MAINTAINERType:  true,
-// 	statement.ONBUILDType:     true,
-// 	statement.RUNType:         true,
-// 	statement.SHELLType:       true,
-// 	statement.STOPSIGNALType:  true,
-// 	statement.USERType:        true,
-// 	statement.VOLUMEType:      true,
-// 	statement.WORKDIRType:     true,
+// 	statement.COPY:        true,
+// 	statement.ENTRYPOINT:  true,
+// 	statement.ENV:         true,
+// 	statement.EXPOSE:      true,
+// 	statement.FROM:        true,
+// 	statement.HEALTHCHECK: true,
+// 	statement.LABEL:       true,
+// 	statement.MAINTAINER:  true,
+// 	statement.ONBUILD:     true,
+// 	statement.RUN:         true,
+// 	statement.SHELL:       true,
+// 	statement.STOPSIGNAL:  true,
+// 	statement.USER:        true,
+// 	statement.VOLUME:      true,
+// 	statement.WORKDIR:     true,
 // }
 
 var statementScannerFor = map[statement.Type]statementScanFn{
@@ -45,24 +45,24 @@ var statementScannerFor = map[statement.Type]statementScanFn{
 		// comments do not escape characters
 		return scanComment(lines)
 	},
-	statement.ADDType:         scanADD,
-	statement.ARGType:         scanARG,
-	statement.CMDType:         scanCMD,
-	statement.COPYType:        scanCOPY,
-	statement.ENTRYPOINTType:  scanENTRYPOINT,
-	statement.ENVType:         scanENV,
-	statement.EXPOSEType:      scanEXPOSE,
-	statement.FROMType:        scanFROM,
-	statement.HEALTHCHECKType: scanHEALTHCHECK,
-	statement.LABELType:       scanLABEL,
-	statement.MAINTAINERType:  scanMAINTAINER,
-	statement.ONBUILDType:     scanONBUILD,
-	statement.RUNType:         scanRUN,
-	statement.SHELLType:       scanSHELL,
-	statement.STOPSIGNALType:  scanSTOPSIGNAL,
-	statement.USERType:        scanUSER,
-	statement.VOLUMEType:      scanVOLUME,
-	statement.WORKDIRType:     scanWORKDIR,
+	statement.ADD:         scanADD,
+	statement.ARG:         scanARG,
+	statement.CMD:         scanCMD,
+	statement.COPY:        scanCOPY,
+	statement.ENTRYPOINT:  scanENTRYPOINT,
+	statement.ENV:         scanENV,
+	statement.EXPOSE:      scanEXPOSE,
+	statement.FROM:        scanFROM,
+	statement.HEALTHCHECK: scanHEALTHCHECK,
+	statement.LABEL:       scanLABEL,
+	statement.MAINTAINER:  scanMAINTAINER,
+	statement.ONBUILD:     scanONBUILD,
+	statement.RUN:         scanRUN,
+	statement.SHELL:       scanSHELL,
+	statement.STOPSIGNAL:  scanSTOPSIGNAL,
+	statement.USER:        scanUSER,
+	statement.VOLUME:      scanVOLUME,
+	statement.WORKDIR:     scanWORKDIR,
 }
 
 type Sequential struct {
@@ -204,11 +204,11 @@ func scanInstruction(lines []string, escapeCharacter rune) (stmt statement.State
 	if scanInstruction, exists := statementScannerFor[instruction]; exists {
 		return scanInstruction(lines, escapeCharacter)
 	}
-	return scanGenericInstruction(lines, escapeCharacter)
+	return scanTODO(lines, escapeCharacter)
 }
 
-func scanGenericInstruction(lines []string, escapeCharacter rune) (stmt statement.Statement, remainingLines []string, err error) {
-	inst := &statement.GenericInstruction{}
+func scanTODO(lines []string, escapeCharacter rune) (stmt statement.Statement, remainingLines []string, err error) {
+	inst := &statement.TODO{}
 	st, rawArgs, statementLines, remainingLines, err := scanInstructionLines(lines, escapeCharacter)
 	if err != nil {
 		return nil, lines, err
