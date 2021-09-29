@@ -3,12 +3,12 @@ package parser
 import (
 	"strings"
 
-	"github.com/dekkagaijin/go-dockerfile/statements"
+	"github.com/dekkagaijin/go-dockerfile/statement"
 )
 
-func scanComment(lines []string) (stmt statements.Statement, remainingLines []string, err error) {
+func scanComment(lines []string) (stmt statement.Statement, remainingLines []string, err error) {
 	remainingLines = lines
-	cmnt := &statements.Comment{}
+	cmnt := &statement.Comment{}
 	for len(remainingLines) > 0 && commentLineMatcher.MatchString(remainingLines[0]) {
 		curr := strings.TrimSpace(remainingLines[0])
 		curr = strings.TrimPrefix(curr, CommentToken) // remove leading "#"

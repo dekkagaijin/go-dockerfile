@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"github.com/dekkagaijin/go-dockerfile/internal/parser"
-	"github.com/dekkagaijin/go-dockerfile/statements"
+	"github.com/dekkagaijin/go-dockerfile/statement"
 )
 
 type Renderer struct {
@@ -30,8 +30,8 @@ func (p Renderer) Render(df *Parsed, out io.Writer) error {
 			fmt.Fprintln(out)
 		}
 		st := stmt.Type()
-		if cmnt, ok := stmt.(*statements.Comment); ok {
-			if i > 0 && df.Statements[i-1].Type() == statements.CommentType {
+		if cmnt, ok := stmt.(*statement.Comment); ok {
+			if i > 0 && df.Statements[i-1].Type() == statement.CommentType {
 				// Add a blank line between distinct comment blocks
 				fmt.Fprintln(out)
 			}
@@ -41,8 +41,8 @@ func (p Renderer) Render(df *Parsed, out io.Writer) error {
 				}
 				fmt.Fprint(out, parser.CommentToken, line)
 			}
-		} else if inst, ok := stmt.(statements.Instruction); ok {
-			if st == statements.FromType && i > 0 && df.Statements[i-1].Type() != statements.CommentType {
+		} else if inst, ok := stmt.(statement.Instruction); ok {
+			if st == statement.FROMType && i > 0 && df.Statements[i-1].Type() != statement.CommentType {
 				// Add a blank line between FROM statement blocks
 				fmt.Fprintln(out)
 			}

@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/dekkagaijin/go-dockerfile/statements"
+	"github.com/dekkagaijin/go-dockerfile/statement"
 )
 
 const (
@@ -16,62 +16,62 @@ const (
 	EscapeParserDirectiveKey = "escape"
 )
 
-type statementScanFn func(lines []string, escapeCharacter rune) (stmt statements.Statement, remainingLines []string, err error)
+type statementScanFn func(lines []string, escapeCharacter rune) (stmt statement.Statement, remainingLines []string, err error)
 
-// var canHaveContinuation = map[statements.Type]bool{
-// 	statements.AddType:         true,
-// 	statements.ArgType:         true,
-// 	statements.CmdType:         true,
-// 	statements.CommentType:     false,
-// 	statements.CopyType:        true,
-// 	statements.EntrypointType:  true,
-// 	statements.EnvType:         true,
-// 	statements.ExposeType:      true,
-// 	statements.FromType:        true,
-// 	statements.HealthcheckType: true,
-// 	statements.LabelType:       true,
-// 	statements.MaintainerType:  true,
-// 	statements.OnbuildType:     true,
-// 	statements.RunType:         true,
-// 	statements.ShellType:       true,
-// 	statements.StopSignalType:  true,
-// 	statements.UserType:        true,
-// 	statements.VolumeType:      true,
-// 	statements.WorkdirType:     true,
+// var canHaveContinuation = map[statement.Type]bool{
+// 	statement.ADDType:         true,
+// 	statement.ARGType:         true,
+// 	statement.CMDType:         true,
+// 	statement.CommentType:     false,
+// 	statement.COPYType:        true,
+// 	statement.ENTRYPOINTType:  true,
+// 	statement.ENVType:         true,
+// 	statement.EXPOSEType:      true,
+// 	statement.FROMType:        true,
+// 	statement.HEALTHCHECKType: true,
+// 	statement.LABELType:       true,
+// 	statement.MAINTAINERType:  true,
+// 	statement.ONBUILDType:     true,
+// 	statement.RUNType:         true,
+// 	statement.SHELLType:       true,
+// 	statement.STOPSIGNALType:  true,
+// 	statement.USERType:        true,
+// 	statement.VOLUMEType:      true,
+// 	statement.WORKDIRType:     true,
 // }
 
-var statementScannerFor = map[statements.Type]statementScanFn{
-	statements.CommentType: func(lines []string, _ rune) (stmt statements.Statement, remainingLines []string, err error) {
+var statementScannerFor = map[statement.Type]statementScanFn{
+	statement.CommentType: func(lines []string, _ rune) (stmt statement.Statement, remainingLines []string, err error) {
 		// comments do not escape characters
 		return scanComment(lines)
 	},
-	statements.AddType:         scanADD,
-	statements.ArgType:         scanARG,
-	statements.CmdType:         scanCMD,
-	statements.CopyType:        scanCOPY,
-	statements.EntrypointType:  scanENTRYPOINT,
-	statements.EnvType:         scanENV,
-	statements.ExposeType:      scanEXPOSE,
-	statements.FromType:        scanFROM,
-	statements.HealthcheckType: scanHEALTHCHECK,
-	statements.LabelType:       scanLABEL,
-	statements.MaintainerType:  scanMAINTAINER,
-	statements.OnbuildType:     scanONBUILD,
-	statements.RunType:         scanRUN,
-	statements.ShellType:       scanSHELL,
-	statements.StopSignalType:  scanSTOPSIGNAL,
-	statements.UserType:        scanUSER,
-	statements.VolumeType:      scanVOLUME,
-	statements.WorkdirType:     scanWORKDIR,
+	statement.ADDType:         scanADD,
+	statement.ARGType:         scanARG,
+	statement.CMDType:         scanCMD,
+	statement.COPYType:        scanCOPY,
+	statement.ENTRYPOINTType:  scanENTRYPOINT,
+	statement.ENVType:         scanENV,
+	statement.EXPOSEType:      scanEXPOSE,
+	statement.FROMType:        scanFROM,
+	statement.HEALTHCHECKType: scanHEALTHCHECK,
+	statement.LABELType:       scanLABEL,
+	statement.MAINTAINERType:  scanMAINTAINER,
+	statement.ONBUILDType:     scanONBUILD,
+	statement.RUNType:         scanRUN,
+	statement.SHELLType:       scanSHELL,
+	statement.STOPSIGNALType:  scanSTOPSIGNAL,
+	statement.USERType:        scanUSER,
+	statement.VOLUMEType:      scanVOLUME,
+	statement.WORKDIRType:     scanWORKDIR,
 }
 
 type Sequential struct {
 	escapeCharacter rune
-	statements      []statements.Statement
+	statements      []statement.Statement
 	directives      map[string]string
 }
 
-func (p *Sequential) Parse(lines []string) ([]statements.Statement, rune, error) {
+func (p *Sequential) Parse(lines []string) ([]statement.Statement, rune, error) {
 	totalLines := len(lines)
 	if totalLines == 0 {
 		return nil, 0, errors.New("dockerfile was empty")
@@ -99,7 +99,7 @@ func (p *Sequential) Parse(lines []string) ([]statements.Statement, rune, error)
 			remainingLines = remainingLines[1:]
 			continue
 		}
-		var stmt statements.Statement
+		var stmt statement.Statement
 		var err error
 		stmt, remainingLines, err = scanStatement(remainingLines, p.escapeCharacter)
 		if err != nil {
@@ -183,21 +183,21 @@ func hasContinuation(line string, escapeCharacter rune) bool {
 	return strings.HasSuffix(line, string(escapeCharacter)) && !strings.HasSuffix(line, string(escapeCharacter)+string(escapeCharacter))
 }
 
-func scanStatement(lines []string, escapeCharacter rune) (stmt statements.Statement, remainingLines []string, err error) {
+func scanStatement(lines []string, escapeCharacter rune) (stmt statement.Statement, remainingLines []string, err error) {
 	if commentLineMatcher.MatchString(lines[0]) {
 		return scanComment(lines)
 	}
 	return scanInstruction(lines, escapeCharacter)
 }
 
-func scanInstruction(lines []string, escapeCharacter rune) (stmt statements.Statement, remainingLines []string, err error) {
+func scanInstruction(lines []string, escapeCharacter rune) (stmt statement.Statement, remainingLines []string, err error) {
 	currentLine := strings.TrimSpace(lines[0])
 	reMatches := instructionLineMatcher.FindStringSubmatch(currentLine)
 	if len(reMatches) != 2 {
 		return nil, lines, fmt.Errorf("syntax error: %q", currentLine)
 	}
-	instruction := statements.Type(strings.ToUpper(reMatches[1]))
-	if !statements.Known[instruction] {
+	instruction := statement.Type(strings.ToUpper(reMatches[1]))
+	if !statement.Known[instruction] {
 		return nil, lines, fmt.Errorf("unknown instruction: %q", instruction)
 	}
 
@@ -212,8 +212,8 @@ func trimContinuation(line string, escapeCharacter rune) string {
 	return strings.TrimSpace(line)
 }
 
-func scanGenericInstruction(lines []string, escapeCharacter rune) (stmt statements.Statement, remainingLines []string, err error) {
-	inst := &statements.GenericInstruction{}
+func scanGenericInstruction(lines []string, escapeCharacter rune) (stmt statement.Statement, remainingLines []string, err error) {
+	inst := &statement.GenericInstruction{}
 
 	currentLine := strings.TrimSpace(lines[0])
 	remainingLines = lines[1:]
@@ -225,7 +225,7 @@ func scanGenericInstruction(lines []string, escapeCharacter rune) (stmt statemen
 	}
 
 	args := strings.Fields(currentLine)
-	inst.InstructionType = statements.Type(strings.ToUpper(args[0]))
+	inst.InstructionType = statement.Type(strings.ToUpper(args[0]))
 	inst.Lines = append(inst.Lines, currentLine)
 	inst.Args = append(inst.Args, args[1:]...)
 
@@ -233,7 +233,7 @@ func scanGenericInstruction(lines []string, escapeCharacter rune) (stmt statemen
 		currentLine = strings.TrimSpace(remainingLines[0])
 		remainingLines = remainingLines[1:]
 		if currentLine == "" {
-			// Ignore blank lines in multi-line statements.
+			// Ignore blank lines in multi-line statement.
 			continue
 		}
 		if commentLineMatcher.MatchString(currentLine) {

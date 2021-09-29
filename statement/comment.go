@@ -1,4 +1,4 @@
-package statements
+package statement
 
 import (
 	"strings"

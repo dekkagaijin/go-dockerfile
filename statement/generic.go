@@ -1,4 +1,4 @@
-package statements
+package statement
 
 type GenericInstruction struct {
 	InstructionType Type

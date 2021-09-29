@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"github.com/dekkagaijin/go-dockerfile/internal/parser"
-	"github.com/dekkagaijin/go-dockerfile/statements"
+	"github.com/dekkagaijin/go-dockerfile/statement"
 )
 
 const (
@@ -15,7 +15,7 @@ const (
 )
 
 type Parsed struct {
-	Statements      []statements.Statement
+	Statements      []statement.Statement
 	EscapeCharacter rune
 }
 
