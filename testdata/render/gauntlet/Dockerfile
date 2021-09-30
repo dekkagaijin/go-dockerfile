@@ -25,6 +25,9 @@
 
 # notadirective=true
 
+arG     ARG1='single-quoted value'
+aRg         ARG2="double-quoted \
+value"
     ArG FOO=foo-default
 
 fRoM build-image-1
@@ -37,7 +40,7 @@ fRoM build-image-1
       dq="double-quoted \
     value" \
 
-    
+
   sq='single-quoted value'
 
 Run cmd \

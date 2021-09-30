@@ -21,6 +21,8 @@
 # SOFTWARE.
 
 # notadirective=true
+ARG ARG1='single-quoted value'
+ARG ARG2="double-quoted value"
 ARG FOO=foo-default
 
 FROM build-image-1

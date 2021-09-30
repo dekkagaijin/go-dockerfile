@@ -9,11 +9,11 @@ import (
 
 var argInstructionArgsMatcher = regexp.MustCompile(
 	reStartOfLine +
-		reOptionalWhitespace +
-		"(" + reNotWhitespaceOrEquals + ")" + // key
-		reOptionalWhitespace +
-		"(?:=" + reOptionalWhitespace + "(" + reNotWhitespaceOrEquals + "))?" + // defaultvalue
-		reDontCare +
+		"(?:" +
+		reArgKeyValuePair +
+		"|" + // or
+		"(" + reNotWhitespaceOrEquals + ")" + // just an arg name
+		")" +
 		reEndOfLine)
 
 // ARG is an instruction of the form:
@@ -29,12 +29,16 @@ func scanARG(lines []string, escapeCharacter rune) (stmt statement.Statement, re
 	}
 
 	reMatches := argInstructionArgsMatcher.FindStringSubmatch(rawArgs)
-	if len(reMatches) != 3 {
-		return nil, lines, fmt.Errorf("syntax error, could not parse ARG args: %q", rawArgs)
+	if len(reMatches) < 4 {
+		return nil, lines, fmt.Errorf("syntax error, ARG args must be of the form `<name>[=<default value>]`: %q", rawArgs)
 	}
+
 	inst := &statement.ArgInstruction{
 		Name:       reMatches[1],
 		DefaultVal: reMatches[2],
+	}
+	if reMatches[3] != "" {
+		inst.Name = reMatches[3]
 	}
 	return inst, remainingLines, nil
 }
