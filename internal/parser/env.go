@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -9,12 +10,22 @@ import (
 	"github.com/dekkagaijin/go-dockerfile/statement"
 )
 
-var envArgsMatcher = regexp.MustCompile(
+const reArgKeyValuePair = "(?:" +
+	"(" + reNotWhitespaceOrEquals + ")" + // key
+	"=" +
+	("(" +
+		("(?:'[^']*')") + // single-quoted val
+		"|" + // or
+		("(?:\"[^\"]*\")") + // double quoted val
+		"|" + // or
+		("(?:" + reNotWhitespace + ")") + // unquoted val
+		")") +
+	")"
+
+var envArgMatcher = regexp.MustCompile(
 	reStartOfLine +
-		reOptionalWhitespace +
-		"(" + reNotWhitespace + "(?:" + reWhitespace + reNotWhitespace + ")*)" + // args minus leading/trailing whitespace
-		reOptionalWhitespace +
-		reEndOfLine)
+		reArgKeyValuePair + // one k-v pair at beginning of line
+		"(?:" + reWhitespace + "|" + reEndOfLine + ")") // whitespace or EOL
 
 /*
 ENV instructions declare environment variables in the container's context.
@@ -53,131 +64,38 @@ func scanENV(lines []string, escapeCharacter rune) (stmt statement.Statement, re
 		return nil, lines, fmt.Errorf("not an ENV statement: %q", statementLines[0])
 	}
 
-	reMatches := envArgsMatcher.FindStringSubmatch(rawArgs)
-	if len(reMatches) != 2 {
-		return nil, lines, fmt.Errorf("syntax error, could not parse ENV args: %q", rawArgs)
+	rawArgs = strings.TrimSpace(rawArgs)
+	if rawArgs == "" {
+		return nil, lines, errors.New("ENV requires arguments")
 	}
-	argsStr := reMatches[1]
-	env, keyOrder, err := parseEnvArgs(argsStr, escapeCharacter)
-	if err != nil {
-		return nil, lines, fmt.Errorf("syntax error in ENV args: %w", err)
-	}
-	return &statement.EnvInstruction{
-		Env:      env,
-		KeyOrder: keyOrder,
-	}, remainingLines, nil
-}
 
-func removeLeadingWhitespace(runes []rune) []rune {
-	for len(runes) > 0 && unicode.IsSpace(runes[0]) {
-		runes = runes[1:]
-	}
-	return runes
-}
-
-// This is so gross. I'm sorry.
-func parseEnvArgs(argsStr string, escapeCharacter rune) (map[string]string, []string, error) {
-	argsStr = strings.TrimSpace(argsStr)
-	unparsed := []rune(argsStr)
-	keyOrder := []string{}
-
-	partialKey := []rune{}
-	for len(unparsed) > 0 && !(unparsed[0] == '=' || unicode.IsSpace(unparsed[0])) {
-		partialKey = append(partialKey, unparsed[0])
-		unparsed = unparsed[1:]
-	}
-	if len(unparsed) == 0 {
-		return nil, nil, fmt.Errorf("args were not of the form `key value` or `key=value ...`: %q", argsStr)
-	}
-	if unparsed[0] != '=' {
-		// This is the legacy form: `key value`
-		unparsed = removeLeadingWhitespace(unparsed)
-		val := string(unparsed)
+	if !envArgMatcher.MatchString(rawArgs) {
+		// This is the legacy form
+		key := strings.Fields(rawArgs)[0]
+		val := strings.TrimSpace(rawArgs[len(key):])
 		if i := strings.IndexFunc(val, unicode.IsSpace); i != -1 {
 			// val contains whitespace, needs to be quoted or escaped
 			val = `"` + val + `"`
 		}
-		key := string(partialKey)
-		keyOrder = append(keyOrder, key)
-		return map[string]string{
-			key: val, // add quotes to unquoted value
-		}, keyOrder, nil
+		return &statement.EnvInstruction{
+			Env:      map[string]string{key: val},
+			KeyOrder: []string{key},
+		}, remainingLines, nil
 	}
 
-	unparsed = unparsed[1:] // remove leading '='
-
-	key := string(partialKey)
-	partialKey = partialKey[:0]
-
-	parsed := map[string]string{}
-
-	partialVal := []rune{}
-	var currentQuote rune = 0
-	for len(unparsed) > 0 {
-		char := unparsed[0]
-		unparsed = unparsed[1:]
-
-		if key == "" {
-			// Need to build the key string...
-
-			if unicode.IsSpace(char) {
-				if len(partialKey) > 0 {
-					return nil, nil, fmt.Errorf("whitespace is not permitted between key strings and '=': %q", argsStr)
-				}
-				continue
-			}
-
-			if char == '=' {
-				if len(partialKey) == 0 {
-					return nil, nil, fmt.Errorf("env keys cannot be blank: %q", argsStr)
-				}
-				key = string(partialKey)
-				partialKey = partialKey[:0]
-				continue
-			}
-
-			partialKey = append(partialKey, char)
-			continue
-		}
-
-		// Key has been built. Need to build the value string...
-
-		if unicode.IsSpace(char) {
-			if currentQuote != 0 {
-				// Spaces are allowed in quoted strings.
-				partialVal = append(partialVal, char)
-			} else if len(partialVal) > 0 {
-				// Spaces terminate unquoted strings.
-				parsed[key] = string(partialVal)
-				keyOrder = append(keyOrder, key)
-
-				// Reset all of the state vars.
-				key = ""
-				partialVal = partialVal[:0]
-				currentQuote = 0
-			}
-			continue
-		}
-
-		if char == '\'' || char == '"' {
-			partialVal = append(partialVal, char)
-			if char == currentQuote {
-				// We've parsed a full quoted key-value pair.
-				parsed[key] = string(partialVal)
-				keyOrder = append(keyOrder, key)
-
-				// Reset all of the state vars.
-				key = ""
-				partialVal = partialVal[:0]
-				currentQuote = 0
-				continue
-			}
-			currentQuote = char
-			continue
-		}
-
-		partialVal = append(partialVal, char)
+	inst := &statement.EnvInstruction{
+		Env: map[string]string{},
 	}
-
-	return parsed, keyOrder, nil
+	unparsed := rawArgs
+	for unparsed != "" {
+		argMatch := envArgMatcher.FindStringSubmatch(unparsed)
+		if len(argMatch) == 0 {
+			return nil, lines, fmt.Errorf("could not parse next `key=value`: %q", unparsed)
+		}
+		key := argMatch[1]
+		inst.Env[key] = argMatch[2]
+		inst.KeyOrder = append(inst.KeyOrder, key)
+		unparsed = unparsed[len(argMatch[0]):]
+	}
+	return inst, remainingLines, nil
 }
