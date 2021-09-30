@@ -29,7 +29,7 @@ ARG FOO=foo-default
 FROM build-image-1
 ARG FOO
 ENV bar=${FOO}
-ENV baz=${bar} dq="double-quoted value" sq='single-quoted value'
+ENV baz=${bar:-default} dq="double-quoted value" sq='single-quoted value'
 RUN cmd arg1 arg2
 
 FROM build-image-2:tag

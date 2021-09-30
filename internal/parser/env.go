@@ -12,7 +12,7 @@ import (
 
 var envArgMatcher = regexp.MustCompile(
 	reStartOfLine +
-		reArgKeyValuePair + // one k-v pair at beginning of line
+		reKeyValuePair + // one k-v pair at beginning of line
 		"(?:" + reWhitespace + "|" + reEndOfLine + ")") // whitespace or EOL
 
 /*

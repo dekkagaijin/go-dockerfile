@@ -37,7 +37,7 @@ fRoM build-image-1
 
 
    ENv bar ${FOO}
-  ENv baz=${bar} \
+  ENv baz=${bar:-default} \
 
       dq="double-quoted \
     value" \

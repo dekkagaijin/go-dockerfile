@@ -114,13 +114,15 @@ func (p *Sequential) Parse(lines []string) ([]statement.Statement, rune, error) 
 const (
 	CommentToken = "#"
 
-	reStartOfLine           = "^"
-	reDontCare              = ".*"
-	reOptionalWhitespace    = "[[:space:]]*"
-	reWhitespace            = "[[:space:]]+"
-	reNotWhitespace         = "[[:^space:]]+"
-	reNotWhitespaceOrEquals = "[^=[:space:]]+"
-	reEndOfLine             = "$"
+	reStartOfLine            = "^"
+	reDontCare               = ".*"
+	reNonCapturingGroupStart = `(?:`
+	reNonCapturingGroupEnd   = `)`
+	reOptionalWhitespace     = "[[:space:]]*"
+	reWhitespace             = "[[:space:]]+"
+	reNotWhitespace          = "[[:^space:]]+"
+	reNotWhitespaceOrEquals  = "[^=[:space:]]+"
+	reEndOfLine              = "$"
 )
 
 var (

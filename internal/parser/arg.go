@@ -7,22 +7,34 @@ import (
 	"github.com/dekkagaijin/go-dockerfile/statement"
 )
 
-const reArgKeyValuePair = "(?:" +
-	"(" + reNotWhitespaceOrEquals + ")" + // key
-	"=" +
-	("(" +
-		(`(?:'` + `(?:\'|[^'])*` + `')`) + // single-quoted val
-		"|" + // or
-		(`(?:"` + `(?:\"|[^"])*` + `")`) + // double quoted val
-		"|" + // or
-		(`(?:` + `(?:\\.|[[:^space:]])+` + `)`) + // unquoted (possibly escaped) val
-		")") +
-	")"
+const (
+	reEscapedCharacter = `(?:\\.)`
+	reSingleQuotedVal  = `(?:'` + `(?:\'|[^'])*` + `')`
+	reDoubleQuotedVal  = `(?:"` + `(?:\"|[^"])*` + `")`
+	reUnquotedVal      = (`(?:` +
+		(`(?:` +
+			reEscapedCharacter +
+			`|` + // or
+			`[[:^space:]]` + // not whitespace
+			`)+`) +
+		`)`)
+	reKeyValuePair = ("(?:" +
+		("(" + reNotWhitespaceOrEquals + ")") + // key
+		"=" +
+		("(" +
+			reSingleQuotedVal +
+			"|" + // or
+			reDoubleQuotedVal +
+			"|" + // or
+			reUnquotedVal + // unquoted (possibly escaped) val
+			")") +
+		")")
+)
 
 var argInstructionArgsMatcher = regexp.MustCompile(
 	reStartOfLine +
 		"(?:" +
-		reArgKeyValuePair +
+		reKeyValuePair +
 		"|" + // or
 		"(" + reNotWhitespaceOrEquals + ")" + // just an arg name
 		")" +
