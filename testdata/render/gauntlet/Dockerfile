@@ -27,7 +27,9 @@
 
 arG     ARG1='single-quoted value'
 aRg         ARG2="double-quoted \
+   
 value"
+  Arg ARG3=escaped\ value
     ArG FOO=foo-default
 
 fRoM build-image-1

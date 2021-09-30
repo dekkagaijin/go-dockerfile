@@ -7,6 +7,18 @@ import (
 	"github.com/dekkagaijin/go-dockerfile/statement"
 )
 
+const reArgKeyValuePair = "(?:" +
+	"(" + reNotWhitespaceOrEquals + ")" + // key
+	"=" +
+	("(" +
+		(`(?:'` + `(?:\'|[^'])*` + `')`) + // single-quoted val
+		"|" + // or
+		(`(?:"` + `(?:\"|[^"])*` + `")`) + // double quoted val
+		"|" + // or
+		(`(?:` + `(?:\\.|[[:^space:]])+` + `)`) + // unquoted (possibly escaped) val
+		")") +
+	")"
+
 var argInstructionArgsMatcher = regexp.MustCompile(
 	reStartOfLine +
 		"(?:" +
@@ -29,7 +41,7 @@ func scanARG(lines []string, escapeCharacter rune) (stmt statement.Statement, re
 	}
 
 	reMatches := argInstructionArgsMatcher.FindStringSubmatch(rawArgs)
-	if len(reMatches) < 4 {
+	if len(reMatches) == 0 {
 		return nil, lines, fmt.Errorf("syntax error, ARG args must be of the form `<name>[=<default value>]`: %q", rawArgs)
 	}
 

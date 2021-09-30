@@ -10,18 +10,6 @@ import (
 	"github.com/dekkagaijin/go-dockerfile/statement"
 )
 
-const reArgKeyValuePair = "(?:" +
-	"(" + reNotWhitespaceOrEquals + ")" + // key
-	"=" +
-	("(" +
-		("(?:'[^']*')") + // single-quoted val
-		"|" + // or
-		("(?:\"[^\"]*\")") + // double quoted val
-		"|" + // or
-		("(?:" + reNotWhitespace + ")") + // unquoted val
-		")") +
-	")"
-
 var envArgMatcher = regexp.MustCompile(
 	reStartOfLine +
 		reArgKeyValuePair + // one k-v pair at beginning of line
