@@ -88,6 +88,20 @@ type Instruction interface {
 	Arguments() Arguments
 }
 
+type Blank struct{}
+
+func (Blank) Type() Type {
+	return Type("")
+}
+
+func (Blank) Flags() map[string]string {
+	return nil
+}
+
+func (Blank) Arguments() Arguments {
+	return Arguments{}
+}
+
 type TODO GenericInstruction
 type CmdInstruction GenericInstruction
 type CopyInstruction GenericInstruction

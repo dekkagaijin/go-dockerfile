@@ -22,8 +22,6 @@ func mustOpen(t *testing.T, path string) io.ReadCloser {
 }
 
 func TestRenderE2E(t *testing.T) {
-	t.Parallel()
-
 	testCases := map[string]struct {
 		originalPath string
 		expectedPath string
@@ -74,5 +72,4 @@ func TestRenderE2E(t *testing.T) {
 			}
 		})
 	}
-
 }

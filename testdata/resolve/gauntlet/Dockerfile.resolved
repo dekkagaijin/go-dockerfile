@@ -21,16 +21,17 @@
 # SOFTWARE.
 
 # notadirective=true
-ARG ARG1='single-quoted value'
-ARG ARG2="double-quoted value"
-ARG ARG3=escaped\ value
-ARG ARG4
-ARG FOO=foo-default
 
+# `ARG ARG1='single-quoted value'` was resolved to `ARG1=val1` from build argument.
+# `ARG ARG2="double-quoted value"` was resolved to `ARG2=val2` from build argument.
+# `ARG ARG3=escaped\ value` was resolved to `ARG3=val3` from build argument.
+# `ARG ARG4` was resolved to `ARG4=val4` from build argument.
+# `ARG FOO=foo-default` was resolved to `FOO=foo value` from build argument.
+# `ARG RUNTIME_IMAGE` was resolved to `RUNTIME_IMAGE=runtime-image@sha256:0bf474896363505e5ea5e5d6ace8ebfb13a760a409b1fb467d428fc716f9f284` from build argument.
 FROM build-image-1
-ARG FOO
-ENV bar=${FOO}
-ENV baz=${bar:-default} dq="double-quoted value" sq='single-quoted value'
+# `ARG FOO` was resolved to `FOO=foo value` from prior declaration.
+ENV bar="foo value"
+ENV baz="foo value" dq="double-quoted value" sq='single-quoted value'
 RUN cmd arg1 arg2
 
 FROM build-image-2:tag

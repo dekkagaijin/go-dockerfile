@@ -1,3 +1,6 @@
+#syntax=docker/dockerfile:1.0
+#     escape     =      \
+
 # MIT License
 #
 # Copyright (c) 2021 Jake Sanders
@@ -21,20 +24,43 @@
 # SOFTWARE.
 
 # notadirective=true
-ARG ARG1='single-quoted value'
-ARG ARG2="double-quoted value"
-ARG ARG3=escaped\ value
+
+arG     ARG1='single-quoted value'
+aRg         ARG2="double-quoted \
+   
+value"
+  Arg ARG3=escaped\ value
 ARG ARG4
-ARG FOO=foo-default
+    ArG FOO=foo-default
+ARG RUNTIME_IMAGE
 
-FROM build-image-1
-ARG FOO
-ENV bar=${FOO}
-ENV baz=${bar:-default} dq="double-quoted value" sq='single-quoted value'
-RUN cmd arg1 arg2
+fRoM build-image-1
+      arg FOO
 
-FROM build-image-2:tag
 
-FROM runtime-image@sha256:0bf474896363505e5ea5e5d6ace8ebfb13a760a409b1fb467d428fc716f9f284
-ENV ONE="TWO= THREE=world"
-CMD echo -n "test test test" | wc -
+   ENv bar ${FOO}
+  ENv baz=${bar:-default} \
+
+      dq="double-quoted \
+    value" \
+
+
+  sq='single-quoted value'
+
+Run cmd \
+
+  arg1 \
+    # Interstital comment
+
+    arg2
+
+    
+
+from     build-image-2:tag
+
+FROM $RUNTIME_IMAGE
+
+
+ENV ONE TWO= THREE=world
+
+CMD  echo      -n "test test test"    |  wc    -
