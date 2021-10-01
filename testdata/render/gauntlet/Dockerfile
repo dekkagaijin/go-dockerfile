@@ -30,6 +30,7 @@ aRg         ARG2="double-quoted \
    
 value"
   Arg ARG3=escaped\ value
+ARG ARG4
     ArG FOO=foo-default
 
 fRoM build-image-1

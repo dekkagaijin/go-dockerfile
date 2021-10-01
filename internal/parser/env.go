@@ -60,13 +60,9 @@ func scanENV(lines []string, escapeCharacter rune) (stmt statement.Statement, re
 	if !envArgMatcher.MatchString(rawArgs) {
 		// This is the legacy form
 		key := strings.Fields(rawArgs)[0]
-		val := strings.TrimSpace(rawArgs[len(key):])
-		if i := strings.IndexFunc(val, unicode.IsSpace); i != -1 {
-			// val contains whitespace, needs to be quoted or escaped
-			val = `"` + val + `"`
-		}
+		rawVal := rawArgs[len(key):]
 		return &statement.EnvInstruction{
-			Env:      map[string]string{key: val},
+			Env:      map[string]string{key: EnsureModernEnvVal(rawVal, escapeCharacter)},
 			KeyOrder: []string{key},
 		}, remainingLines, nil
 	}
@@ -86,4 +82,15 @@ func scanENV(lines []string, escapeCharacter rune) (stmt statement.Statement, re
 		unparsed = unparsed[len(argMatch[0]):]
 	}
 	return inst, remainingLines, nil
+}
+
+func EnsureModernEnvVal(rawVal string, escapeCharacter rune) string {
+	val := strings.TrimSpace(rawVal)
+	if i := strings.IndexFunc(val, unicode.IsSpace); i != -1 {
+		if !((strings.HasPrefix(val, `"`) && strings.HasSuffix(val, `"`)) || (strings.HasPrefix(val, `'`) && strings.HasSuffix(val, `'`))) {
+			// val contains whitespace, needs to be quoted or escaped
+			val = `"` + val + `"`
+		}
+	}
+	return val
 }
