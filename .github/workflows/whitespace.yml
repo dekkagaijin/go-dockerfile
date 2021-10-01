@@ -1,8 +1,6 @@
 name: Whitespace
 
-on:
-  pull_request:
-    branches: [ 'main', 'release-*' ]
+on: [push, pull_request]
 
 jobs:
 
