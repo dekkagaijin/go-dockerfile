@@ -38,12 +38,12 @@ jobs:
           echo '::group:: Flagging trailing whitespace with reviewdog 🐶 ...'
           # Don't fail because of grep
           set +o pipefail
-          # Exclude generated and vendored files, plus some legacy
+          # Exclude generated and vendored files, testdata, plus some legacy
           # paths until we update all .gitattributes
           git ls-files |
           git check-attr --stdin linguist-generated | grep -Ev ': (set|true)$' | cut -d: -f1 |
           git check-attr --stdin linguist-vendored | grep -Ev ': (set|true)$' | cut -d: -f1 |
-          grep -Ev '^(vendor/|third_party/|.git)' |
+          grep -Ev '^(vendor/|third_party/|.git|testdata/)' |
           xargs grep -nE " +$" |
           reviewdog -efm="%f:%l:%m" \
                 -name="trailing whitespace" \
