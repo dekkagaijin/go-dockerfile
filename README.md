@@ -1,6 +1,7 @@
 # go-dockerfile
 
-[![Go](https://github.com/dekkagaijin/go-dockerfile/actions/workflows/go.yml/badge.svg)](https://github.com/dekkagaijin/go-dockerfile/actions/workflows/go.yml)
+[![Build](https://github.com/dekkagaijin/go-dockerfile/actions/workflows/build.yml/badge.svg)](https://github.com/dekkagaijin/go-dockerfile/actions/workflows/build.yml)
+[![Test](https://github.com/dekkagaijin/go-dockerfile/actions/workflows/test.yml/badge.svg)](https://github.com/dekkagaijin/go-dockerfile/actions/workflows/test.yml)
 [![CodeQL](https://github.com/dekkagaijin/go-dockerfile/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/dekkagaijin/go-dockerfile/actions/workflows/codeql-analysis.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/dekkagaijin/go-dockerfile)](https://goreportcard.com/report/github.com/dekkagaijin/go-dockerfile)
 
