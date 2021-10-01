@@ -6,6 +6,6 @@
 
 Golang utilities for interacting with Dockerfiles.
 
-This is not a place of honor. No esteemed source code is commemorate here. Don't take a dependency on this (yet).
+This is not a place of honor. No esteemed source code is commemorated here. Don't take a dependency on this (yet).
 
 ![Nothing valued is here](https://www.abc.net.au/cm/rimage/7182120-16x9-large.jpg?v=3)
